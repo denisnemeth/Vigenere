@@ -40,29 +40,32 @@ public class Controller {
     public void encrypt(ActionEvent actionEvent) {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            String[] splitName = file.getName().split("\\.");
+            BufferedWriter writer = new BufferedWriter(new FileWriter(splitName[0] + "_encrypt.txt"));
             if (file != null) {
-                String line, key = txtfld_key.getText().toUpperCase(), encryptedText = "";
-                char[] arrKey = key.toCharArray();
-                int pos, startValue, endValue;
-                for (pos = 0; pos <= key.length(); pos++) {
-                    while ((startValue = reader.read()) != -1) {
-                        char letter = (char) startValue;
-                        if (pos == key.length()) {
-                            pos = 0;
-                        }
-                        if (startValue < 65 || (startValue > 90 && startValue < 97) || startValue > 122) {
-                            endValue = startValue;
-                        } else {
-                            endValue = startValue + ((key.charAt(pos)) - 65);
-                            if ((endValue > 90 && endValue < 97) || endValue > 122) {
-                                endValue -= 26;
-                            }
-                        }
-                        encryptedText += (char) endValue;
+                String key = txtfld_key.getText().toUpperCase();
+                StringBuilder encryptedText = new StringBuilder();
+                int pos = 0, startValue, endValue;
+                while (((startValue = reader.read()) != -1) && pos <= key.length()) {
+                    if (pos == key.length()) {
+                        pos = 0;
                     }
+                    if (startValue < 65 || (startValue > 90 && startValue < 97) || startValue > 122) {
+                        endValue = startValue;
+                        pos--;
+                    } else {
+                        endValue = startValue + ((key.charAt(pos)) - 65);
+                        if (startValue <= 90 && endValue > 90 || endValue > 122) {
+                            endValue -= 26;
+                        }
+                    }
+                    pos++;
+                    encryptedText.append((char) endValue);
                 }
                 System.out.println(encryptedText);
+                writer.write(encryptedText.toString());
                 reader.close();
+                writer.close();
             } else {
                 lbl_selectedFile.setText("Please select a file!");
             }
@@ -71,5 +74,46 @@ public class Controller {
         }
     }
     public void decrypt(ActionEvent actionEvent) {
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            BufferedWriter writer;
+            if (file.getName().contains("_encrypt.txt")) {
+                String[] splitName = file.getName().split("_");
+                writer = new BufferedWriter(new FileWriter(splitName[0] + ".txt"));
+            } else {
+                String[] splitName = file.getName().split("\\.");
+                writer = new BufferedWriter(new FileWriter(splitName[0] + "_decrypt.txt"));
+            }
+            if (file != null) {
+                String key = txtfld_key.getText().toUpperCase();
+                StringBuilder encryptedText = new StringBuilder();
+                int pos = 0, startValue, endValue;
+                while (((startValue = reader.read()) != -1) && pos <= key.length()) {
+                    if (pos == key.length()) {
+                        pos = 0;
+                    }
+                    if (startValue < 65 || (startValue > 90 && startValue < 97) || startValue > 122) {
+                        endValue = startValue;
+                        pos--;
+                    } else {
+                        endValue = startValue - ((key.charAt(pos)) - 65);
+                        // need to fix this
+                        if (((startValue >= 65 && startValue <= 90) && (endValue > 90)) || endValue > 122) {
+                            endValue += 26;
+                        }
+                    }
+                    pos++;
+                    encryptedText.append((char) endValue);
+                }
+                System.out.println(encryptedText);
+                writer.write(encryptedText.toString());
+                reader.close();
+                writer.close();
+            } else {
+                lbl_selectedFile.setText("Please select a file!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

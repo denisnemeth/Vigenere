@@ -97,8 +97,7 @@ public class Controller {
                         pos--;
                     } else {
                         endValue = startValue - ((key.charAt(pos)) - 65);
-                        // need to fix this
-                        if (((startValue >= 65 && startValue <= 90) && (endValue > 90)) || endValue > 122) {
+                        if (endValue < 65 || startValue >= 97 && endValue < 97) {
                             endValue += 26;
                         }
                     }
